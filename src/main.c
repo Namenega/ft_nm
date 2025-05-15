@@ -2,6 +2,7 @@
 
 
 void	print_error(char *s, int exit_code, int fd) {
+
 	perror(s);
 	if (exit_code != 1 && exit_code != 2) {
 		printf("Exit Code: %d\nClosing FD...\n", exit_code);		// TO REMOVE
@@ -11,11 +12,11 @@ void	print_error(char *s, int exit_code, int fd) {
 	exit(exit_code);
 }
 
-int		main(int ac, char **av)
-{
+int		main(int ac, char **av) {
+
 	int				fd;
 	struct stat		st;
-	unsigned char	*data;
+	void			*data;
 
 	// Validate arguments (except at least one for ELF file)
 	if (ac != 2) {
@@ -54,14 +55,14 @@ int		main(int ac, char **av)
 
 	// Validate ELF magic byte
 	if (isELFfile(data, st.st_size) != 1) {
+		printf("--------------- CLEAN UP ---------------\n");
 		printf("\nUnmapping data from memory...\n");		// TO REMOVE
 		munmap(data, st.st_size);
 		print_error("Not an ELF file", EXIT_ELF, fd);
 	}
 
 	// Parse ELF header
-	//elf_handling();
-
+	elf_parser(data);
 
 	// Locate section header, string table
 

@@ -1,10 +1,20 @@
 #include "../hdr/nm.h"
 
+
 /*
+ * PRINTFILEDATA
+ * -------------
  * Utility function to print 'data' (mapped memory of the file)
+ *
+ * PRINTELFHEADERDATA
+ * ------------------
+ * Utility function to print ELF Header data
+ *
  */
 
-void	printFileData(unsigned char *data, size_t st_size) {
+void	printFileData(void *elf_data, size_t st_size) {
+
+	unsigned char	*data = (unsigned char *)elf_data;
 
 	if (!data || !st_size)
 		printf("Missing data");
@@ -17,6 +27,41 @@ void	printFileData(unsigned char *data, size_t st_size) {
 	printf("\n\n-----------------------------\n\n");
 }
 
+void	printELFHeaderData(Elf64_Ehdr *ehdr) {
+	
+	printf(">> PRINT ELF HEADER <<\n");
+	printf("e_ident[16]:\t");
+	for (int i = 0; i < 16; i++) {
+
+		printf("[%c]", ehdr->e_ident[i]);
+	}
+	printf("\n");
+	printf("e_type:\t\t[%d]\n", ehdr->e_type);
+	printf("e_machine:\t[%d]\n", ehdr->e_machine);
+	printf("e_version:\t[%d]\n", ehdr->e_version);
+	printf("e_entry:\t[%ld]\n", ehdr->e_entry);
+	printf("e_phoff:\t[%ld]\n", ehdr->e_phoff);
+	printf("e_shoff:\t[%ld]\n", ehdr->e_shoff);
+	printf("e_flags:\t[%d]\n", ehdr->e_flags);
+	printf("e_ehsize:\t[%d]\n", ehdr->e_ehsize);
+	printf("e_phentsize:\t[%d]\n", ehdr->e_phentsize);
+	printf("e_phnum:\t[%d]\n", ehdr->e_phnum);
+	printf("e_shentsize:\t[%d]\n", ehdr->e_shentsize);
+	printf("e_shnum:\t[%d]\n", ehdr->e_shnum);
+	printf("e_shstrndx:\t[%d]\n", ehdr->e_shstrndx);
+}
+
+void	printELFSectionHeaderData(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr) {
+
+	printf(">> PRINT ELF SECTION HEADER <<\n");
+	for (int i = 0; i < ehdr->e_shnum; i++) {
+    	printf("Section %d: sh_name: %u, sh_type: %u, sh_offset: 0x%lx\n",
+        	i, shdr[i].sh_name, shdr[i].sh_type, shdr[i].sh_offset);
+	}
+}
+
+/* --------------- END OF UTILITY FUNCTIONS --------------- */
+
 /*
  * Check the Magic Bytes of the file
  * Return 1 if it is an ELF file
@@ -26,8 +71,10 @@ void	printFileData(unsigned char *data, size_t st_size) {
  * stsize = size of mapped data, from 'fstat()'
  */
 
-int		isELFfile(unsigned char *data, size_t st_size) {
+int		isELFfile(void *elf_data, size_t st_size) {
 	
+	unsigned char	*data = (unsigned char *)elf_data;
+
 	if (!data || !st_size)
 		return (0);
 
@@ -35,10 +82,58 @@ int		isELFfile(unsigned char *data, size_t st_size) {
 		data[1] == 'E' &&
 		data[2] == 'L' &&
 		data[3] == 'F') {
-		printf("[GOOD] - This is an ELF file!\n");		// TO REMOVE
+		printf("[GOOD] - This is an ELF file!\n");									// TO REMOVE
 		return (1);
 	}
 	return (0);
 }
 
 
+Elf64_Shdr	*findSymtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab) {
+
+	const char	*name;
+	uint32_t	type;
+
+	for (int i = 0; i < ehdr->e_shnum; i++) {
+		name = shstrtab + shdr[i].sh_name;
+		type = shdr[i].sh_type;
+
+		printf("SYMTAB [%d] - name: [%s] - type: [%d]\n", i, name, type);
+		if (!strncmp(name, ".symtab", 7) && type == SHT_SYMTAB)
+			return (&shdr[i]);
+	}
+	return (NULL);
+}
+
+
+/*
+ * Parsing the file to get information on:
+ * - ELF Header
+ * - Section Headers
+ */
+
+void	elf_parser(void *elf_data) {
+
+	// Parse ELF Header
+	Elf64_Ehdr	*ehdr = (Elf64_Ehdr *)elf_data;
+	printf("\n--------------- ELF HEADER PARSER ---------------\n\n");				// TO REMOVE	
+	//printELFHeaderData(ehdr);														// TO REMOVE
+
+
+	// Parse ELF Section Headers
+	Elf64_Shdr	*shdr = (Elf64_Shdr *)((char *)elf_data + ehdr->e_shoff);
+	printf("\n--------------- ELF SECTION HEADER PARSER ---------------\n\n");		// TO REMOVE	
+	//printELFSectionHeaderData(ehdr, shdr);											// TO REMOVE
+
+	// Parse SH_STRTAB (String table. Holds the name of all sections, involving NULL-terminated string.)
+	const char	*shstrtab = (char *)elf_data + shdr[ehdr->e_shstrndx].sh_offset;
+	
+	Elf64_Shdr	*symtab_hdr = findSymtabHeader(ehdr, shdr, shstrtab);
+	
+
+	if (!symtab_hdr)
+		printf("WE MADE IT - NO SYMTAB\n");
+	else
+		printf("WE MADE IT - SYMTAB IS THERE\n");
+
+}

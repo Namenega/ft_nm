@@ -9,6 +9,7 @@
 # include <fcntl.h>
 # include <sys/mman.h>
 # include <sys/stat.h>
+# include <string.h>				// TO REMOVE
 
 # include "../inc/libft/libft.h"
 
@@ -17,6 +18,9 @@
 # define EXIT_FST	3
 # define EXIT_MMAP	4
 # define EXIT_ELF	5
+
+# define SHT_SYMTAB	2
+# define SHT_STRTAB	3
 
 
 /* Executable header structure */
@@ -35,7 +39,7 @@ typedef struct	Elf64_Ehdr {
 	uint16_t		e_phnum;		// Program Header Entries Number
 	uint16_t		e_shentsize;	// Section Header Entry Size
 	uint16_t		e_shnum;		// Section Header Entries Number
-	uint16_t		e_shstrndx;		//Index of shstrtab (Elf64_Shdr struct)
+	uint16_t		e_shstrndx;		// Index of shstrtab (Elf64_Shdr struct)
 
 }				Elf64_Ehdr;
 
@@ -64,8 +68,12 @@ int		main(int ac, char **av);
 void	print_error(char *s, int exit_code, int fd);
 
 /* ---------- ELF PARSER FUNCTIONS ---------- */
-void	printFileData(unsigned char *data, size_t st_size);
-int		isELFfile(unsigned char *data, size_t st_size);
+void		printFileData(void *elf_data, size_t st_size);
+void		printELFHeaderData(Elf64_Ehdr *ehdr);
+void		printELFSectionHeaderData(Elf64_Ehdr *ehdr, Elf64_Shdr *Shdr);
+int			isELFfile(void *elf_data, size_t st_size);
+Elf64_Shdr	*findSymtab(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab);
+void		elf_parser(void *elf_data);
 
 
 #endif
