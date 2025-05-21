@@ -82,7 +82,7 @@ int		isELFfile(void *elf_data, size_t st_size) {
 		data[1] == 'E' &&
 		data[2] == 'L' &&
 		data[3] == 'F') {
-		printf("[GOOD] - This is an ELF file!\n");									// TO REMOVE
+		printf("[GOOD] - This is an ELF file!\n\n");									// TO REMOVE
 		return (1);
 	}
 	return (0);
@@ -98,13 +98,30 @@ Elf64_Shdr	*findSymtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shs
 		name = shstrtab + shdr[i].sh_name;
 		type = shdr[i].sh_type;
 
-		printf("SYMTAB [%d] - name: [%s] - type: [%d]\n", i, name, type);
-		if (!strncmp(name, ".symtab", 7) && type == SHT_SYMTAB)
+		//printf("SYMTAB [%d] - name: [%s] - type: [%d]\n", i, name, type);			// TO REMOVE
+		if (!ft_strncmp(name, ".symtab", 7) && type == SHT_SYMTAB)
 			return (&shdr[i]);
 	}
 	return (NULL);
 }
 
+
+Elf64_Shdr	*findStrtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab) {
+
+	const char	*name;
+	uint32_t	type;
+
+	for (int i = 0; i < ehdr->e_shnum; i++) {
+		name = shstrtab + shdr[i].sh_name;
+		type = shdr[i].sh_type;
+
+
+		//printf("STRTAB [%d] - name: [%s] - type: [%d]\n", i, name, type);			// TO REMOVE
+		if (!ft_strncmp(name, ".strtab", 7) && type == SHT_STRTAB)
+			return (&shdr[i]);
+	}
+	return (NULL);
+}
 
 /*
  * Parsing the file to get information on:
@@ -112,28 +129,31 @@ Elf64_Shdr	*findSymtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shs
  * - Section Headers
  */
 
-void	elf_parser(void *elf_data) {
+t_Elfdata	elfParser(void *elf_data, int fd) {
 
+	t_Elfdata	edata;
 	// Parse ELF Header
-	Elf64_Ehdr	*ehdr = (Elf64_Ehdr *)elf_data;
-	printf("\n--------------- ELF HEADER PARSER ---------------\n\n");				// TO REMOVE	
-	//printELFHeaderData(ehdr);														// TO REMOVE
+	edata.ehdr = (Elf64_Ehdr *)elf_data;
+	//printELFHeaderData(edata.ehdr);														// TO REMOVE
 
 
 	// Parse ELF Section Headers
-	Elf64_Shdr	*shdr = (Elf64_Shdr *)((char *)elf_data + ehdr->e_shoff);
-	printf("\n--------------- ELF SECTION HEADER PARSER ---------------\n\n");		// TO REMOVE	
+	edata.shdr = (Elf64_Shdr *)((char *)elf_data + edata.ehdr->e_shoff);
 	//printELFSectionHeaderData(ehdr, shdr);											// TO REMOVE
 
 	// Parse SH_STRTAB (String table. Holds the name of all sections, involving NULL-terminated string.)
-	const char	*shstrtab = (char *)elf_data + shdr[ehdr->e_shstrndx].sh_offset;
+	edata.shstrtab = (char *)elf_data + edata.shdr[edata.ehdr->e_shstrndx].sh_offset;
 	
-	Elf64_Shdr	*symtab_hdr = findSymtabHeader(ehdr, shdr, shstrtab);
+	edata.symtab_hdr = findSymtabHeader(edata.ehdr, edata.shdr, edata.shstrtab);
+	edata.strtab_hdr = findStrtabHeader(edata.ehdr, edata.shdr, edata.shstrtab);
 	
 
-	if (!symtab_hdr)
-		printf("WE MADE IT - NO SYMTAB\n");
-	else
-		printf("WE MADE IT - SYMTAB IS THERE\n");
+	if (!edata.symtab_hdr || !edata.strtab_hdr) {
+		printf("WE MADE IT - NO SYMTAB\n");								// TO REMOVE
+		print_error("Missing Symtab or Shstrtab", EXIT_SYMTAB, fd);
+	}
+	else																// TO REMOVE
+		printf("WE MADE IT - SYMTAB OR SHSTRTAB IS THERE\n");			// TO REMOVE
 
+	return (edata);
 }

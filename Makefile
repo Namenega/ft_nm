@@ -1,5 +1,6 @@
 SRCNAME		=	src/main.c	\
-				src/ELFparser.c
+				src/ELFparser.c	\
+				src/symbol.c
 
 SRCS		= ${SRCNAME}
 

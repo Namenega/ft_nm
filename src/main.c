@@ -17,6 +17,7 @@ int		main(int ac, char **av) {
 	int				fd;
 	struct stat		st;
 	void			*data;
+	t_Elfdata		edata;
 
 	// Validate arguments (except at least one for ELF file)
 	if (ac != 2) {
@@ -61,14 +62,12 @@ int		main(int ac, char **av) {
 		print_error("Not an ELF file", EXIT_ELF, fd);
 	}
 
-	// Parse ELF header
-	elf_parser(data);
-
-	// Locate section header, string table
-
+	// Parse ELF header - locate section header, string table
+	edata = elfParser(data, fd);
+	
 
 	// Find symbol table (.symtab) and associated string table
-
+	symbolHandling(data, edata);
 
 	// Read and interpret symbol entries
 
