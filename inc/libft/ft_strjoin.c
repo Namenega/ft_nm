@@ -20,8 +20,7 @@ char			*ft_strjoin(char const *s1, char const *s2)
 
 	i = 0;
 	j = 0;
-	//if ((char *)s1 == '\0' || (char *)s2 == '\0')
-	if ((char *)s1 == (void *)0 || (char *)s2 == (void *)0)
+	if (!(char *)s1 || !(char *)s2)
 		return (0);
 	tab = malloc(sizeof(char *) * (ft_strlen(s1) + ft_strlen(s2) + 1));
 	if (!tab)

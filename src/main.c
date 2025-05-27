@@ -5,12 +5,28 @@ void	print_error(char *s, int exit_code, int fd) {
 
 	perror(s);
 	if (exit_code != 1 && exit_code != 2) {
-		printf("Exit Code: %d\nClosing FD...\n", exit_code);		// TO REMOVE
 		close(fd);
 	}
-	printf("Ending Program...\n\n");							// TO REMOVE
 	exit(exit_code);
 }
+
+/*
+ * If no argument provided, try a.out by default
+ * If no a.out, return 0
+ */
+
+static int no_arg(const char *filename) {
+
+    int fd = open(filename, O_RDONLY);
+
+	if (fd < 0)
+		return 0;  // file not found or unreadable
+
+	close(fd);
+
+	return 1;      // file exists
+}
+
 
 int		main(int ac, char **av) {
 
@@ -20,68 +36,70 @@ int		main(int ac, char **av) {
 	t_Elfdata		edata;
 
 	// Validate arguments (except at least one for ELF file)
-	if (ac != 2) {
-		perror("Wrong number of arguments");
-		exit(EXIT_ARG);
+	if (ac == 1) {
+		if (!no_arg("a.out")) {
+			perror("ft_nm: 'a.out'");
+			exit(EXIT_ARG);
+		}
 	}
 
+	for (int i = 1; i < ac; i++) {
 
-	// Open -- open(file, options)
-	fd = open(av[1], O_RDONLY);
-	if (fd < 1)
-		print_error("open()", EXIT_FD, fd);
+		fd = open(av[i], O_RDONLY);
+		if (fd < 1) {
+			ft_printf("ft_nm: '%s': No such file\n", av[i]);
+			continue;
+		}
 
-	// Check file -- fstat(fd, struct stat)
-	if (fstat(fd, &st) < 0)
-		print_error("fstat()", EXIT_FST, fd);
+		// Check file -- fstat(fd, struct stat)
+		if (fstat(fd, &st) < 0)
+			print_error("fstat()", EXIT_FST, fd);
 
-	// Check if regular file or not
-	if (!S_ISREG(st.st_mode))
-		print_error("Not regular file", EXIT_FST, fd);
-	else {													// TO REMOVE
-		printf("FILE: %s\n", av[1]);						// TO REMOVE
-		printf("[GOOD] - It is a regular file\n");			// TO REMOVE
-	}
+		// Check if regular file or not
+		if (!S_ISREG(st.st_mode)) {
+			ft_printf("ft_nm: Warning: '%s' is not a regular file\n", av[i]);
+			close(fd);
+			continue;
+		}
 
-
-
-	// Map file into memory
-	data = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+		// Map file into memory
+		data = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	
-	// Check if mapping succeeded
-	if (data == MAP_FAILED)
-		print_error("mmap()", EXIT_MMAP, fd);
+		// Check if mapping succeeded
+		if (data == MAP_FAILED)
+			print_error("mmap()", EXIT_MMAP, fd);
 
+		// Validate ELF magic byte
+		if (isELFfile(data, st.st_size) != 1) {
+			munmap(data, st.st_size);
+			close(fd);
+			ft_printf("ft_nm: %s: file format not recognized\n", av[i]);
+			continue;
+		}
 
+		ft_printf("\n%s:\n", av[i]);
 
-	// Validate ELF magic byte
-	if (isELFfile(data, st.st_size) != 1) {
-		printf("--------------- CLEAN UP ---------------\n");
-		printf("\nUnmapping data from memory...\n");		// TO REMOVE
+		// Parse ELF header - locate section header, string table
+		edata = elfParser(data);
+
+		if (!edata.symtab_hdr || !edata.strtab_hdr) {
+			munmap(data, st.st_size);
+			close(fd);
+			ft_printf("ft_nm: %s: no symbols\n", av[i]);
+			continue;
+		}
+
+		// Find symbol table (.symtab) and associated string table
+		// Read and interpret symbol entries
+		// Print symbol tables entries
+		symbolHandling(data, edata);
+
+		// clean up
 		munmap(data, st.st_size);
-		print_error("Not an ELF file", EXIT_ELF, fd);
+		close(fd);
 	}
-
-	// Parse ELF header - locate section header, string table
-	edata = elfParser(data, fd);
-	
-
-	// Find symbol table (.symtab) and associated string table
-	symbolHandling(data, edata);
-
-	// Read and interpret symbol entries
-
-
-	// Print symbol tables entries
-
-
-	// clean up
-	printf("\n--------------- CLEAN UP ---------------\n");	// TO REMOVE
-	printf("Unmapping data from memory...\n");				// TO REMOVE
-	munmap(data, st.st_size);
-	printf("Closing FD...\n");								// TO REMOVE
-	close(fd);
-	printf("Ending Program...\n\n");						// TO REMOVE
 
 	return (0);
 }
+
+

@@ -1,11 +1,25 @@
 #include "../hdr/nm.h"
-//#include "elf.h"
 
+static char	getELFSymbolType(Elf64_Sym symbol, char type) {
 
-void	write_symbol(uint64_t value, char type, const char *name, int is_undefind) {
+	if (ELF64_ST_BIND(symbol.st_info) == STB_WEAK)
+		type = 'W';
+	else if (symbol.st_shndx == SHN_UNDEF)
+        type = 'U';
+	else {
+		switch (ELF64_ST_TYPE(symbol.st_info)) {
+			case STT_FUNC: type = 'T'; break;
+			case STT_OBJECT: type = 'D'; break;
+			default: type = 'T'; break;
+		}
+    }
+	
+	// Lowercase for local symbols
+    if (ELF64_ST_BIND(symbol.st_info) == STB_LOCAL && type >= 'A' && type <= 'Z') {
+        type += 32;
+    }
 
-	char line[256];
-	int len = 0;
+	return (type);
 }
 
 
@@ -28,36 +42,14 @@ void	symbolHandling(void *elf_data, t_Elfdata edata) {
 		if (!name[0])
 			continue;
 
-		//printf("SYMBOL NAME: [%s]\n", name);				// TO REMOVE
-
 		char type = '?';
+		type = getELFSymbolType(symbol, type);
 
-		if (ELF64_ST_BIND(symbol.st_info) == STB_WEAK) {
-			
-			type = 'W';
-			//printf("SYMBOL NAME: [%s]; type [%c]\n", name, type);				// TO REMOVE
-		} else if (symbol.st_shndx == SHN_UNDEF) {
-            type = 'U';
-			//printf("SYMBOL NAME: [%s]; type [%c]\n", name, type);				// TO REMOVE
-        } else {
-            switch (ELF64_ST_TYPE(symbol.st_info)) {
-                case STT_FUNC: type = 'T'; break;
-                case STT_OBJECT: type = 'D'; break;
-                default: type = 'T'; break;
-            }
-			//printf("SYMBOL NAME: [%s]; type [%c]\n", name, type);				// TO REMOVE
-        }
-
-		// Lowercase for local symbols
-        if (ELF64_ST_BIND(symbol.st_info) == STB_LOCAL && type >= 'A' && type <= 'Z') {
-            type += 32;
-        }
-
-        //if (symbol.st_shndx != SHN_UNDEF)
-        //    printf("%016lx %c %s\n", symbol.st_value, type, name);
-        //else
-        //    printf("                 %c %s\n", type, name);
-
-		write_symbol(symbol.st_value, type, name, symbol.st_shndx == SHN_UNDEF);
+		// Print symbol
+        if (symbol.st_shndx != SHN_UNDEF) {
+			ft_printf("%016lx %c %s\n", symbol.st_value, type, name);
+		}
+        else
+            ft_printf("                 %c %s\n", type, name);
 	}
 }

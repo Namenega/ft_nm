@@ -2,23 +2,21 @@
 
 
 /*
- * PRINTFILEDATA()
- * ---------------
+ * PRINTFILEDATA
+ * -------------
  * Utility function to print 'data' (mapped memory of the file)
  *
  *
- * PRINTELFHEADERDATA()
- * --------------------
+ * PRINTELFHEADERDATA
+ * ------------------
  * Utility function to print ELF Header data
  *
  *
- * PRINTELFSECTIONHEADERDATA()
- * ---------------------------
+ * PRINTELFSECTIONHEADERDATA
+ * -------------------------
  * Utility function to print ELF Section Header data
  *
  */
-
-/*
 
 void	printFileData(void *elf_data, size_t st_size) {
 
@@ -68,11 +66,7 @@ void	printELFSectionHeaderData(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr) {
 	}
 }
 
-*/
-
 /* --------------- END OF UTILITY FUNCTIONS --------------- */
-
-
 
 /*
  * Check the Magic Bytes of the file
@@ -94,17 +88,12 @@ int		isELFfile(void *elf_data, size_t st_size) {
 		data[1] == 'E' &&
 		data[2] == 'L' &&
 		data[3] == 'F') {
+		//ft_printf("[GOOD] - This is an ELF file!\n\n");									// TO REMOVE
 		return (1);
 	}
 	return (0);
 }
 
-
-/*
- * Find the .symtab header
- * Return the location of the .symtab table
- * Return NULL if no .symtab
- */
 
 Elf64_Shdr	*findSymtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab) {
 
@@ -115,18 +104,13 @@ Elf64_Shdr	*findSymtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shs
 		name = shstrtab + shdr[i].sh_name;
 		type = shdr[i].sh_type;
 
+		//ft_printf("SYMTAB [%d] - name: [%s] - type: [%d]\n", i, name, type);			// TO REMOVE
 		if (!ft_strncmp(name, ".symtab", 7) && type == SHT_SYMTAB)
 			return (&shdr[i]);
 	}
 	return (NULL);
 }
 
-
-/*
- * Find the .strtab header
- * Return the location of the .strtab table
- * Return NULL if no .strtab
- */
 
 Elf64_Shdr	*findStrtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab) {
 
@@ -137,6 +121,8 @@ Elf64_Shdr	*findStrtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shs
 		name = shstrtab + shdr[i].sh_name;
 		type = shdr[i].sh_type;
 
+
+		//ft_printf("STRTAB [%d] - name: [%s] - type: [%d]\n", i, name, type);			// TO REMOVE
 		if (!ft_strncmp(name, ".strtab", 7) && type == SHT_STRTAB)
 			return (&shdr[i]);
 	}
@@ -150,24 +136,31 @@ Elf64_Shdr	*findStrtabHeader(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shs
  * - Section Headers
  */
 
-t_Elfdata	elfParser(void *elf_data) {
+t_Elfdata	elfParser(void *elf_data, int fd) {
 
 	t_Elfdata	edata;
-	edata.ehdr = (Elf64_Ehdr *)elf_data;		// Parse ELF Header
-	edata.shdr = (Elf64_Shdr *)((char *)elf_data + edata.ehdr->e_shoff);	// Parse ELF Section Headers
+	// Parse ELF Header
+	edata.ehdr = (Elf64_Ehdr *)elf_data;
+	//printELFHeaderData(edata.ehdr);														// TO REMOVE
+
+
+	// Parse ELF Section Headers
+	edata.shdr = (Elf64_Shdr *)((char *)elf_data + edata.ehdr->e_shoff);
+	//printELFSectionHeaderData(edata.ehdr, edata.shdr);											// TO REMOVE
 
 	// Parse SH_STRTAB (String table. Holds the name of all sections, involving NULL-terminated string.)
 	edata.shstrtab = (char *)elf_data + edata.shdr[edata.ehdr->e_shstrndx].sh_offset;
 	
-	// Parse .symtab and .strtab
 	edata.symtab_hdr = findSymtabHeader(edata.ehdr, edata.shdr, edata.shstrtab);
 	edata.strtab_hdr = findStrtabHeader(edata.ehdr, edata.shdr, edata.shstrtab);
 	
-	// Error handling if no .symtab or no .strtab
-	//if (!edata.symtab_hdr || !edata.strtab_hdr) {
-		//print_error("Missing Symtab or Strtab", EXIT_SYMTAB, fd);
-	//	return (NULL);
-	//}
+
+	if (!edata.symtab_hdr || !edata.strtab_hdr) {
+		ft_printf("WE MADE IT - NO SYMTAB\n");								// TO REMOVE
+		print_error("Missing Symtab or Shstrtab", EXIT_SYMTAB, fd);
+	}
+	//else																// TO REMOVE
+		//ft_printf("WE MADE IT - SYMTAB OR SHSTRTAB IS THERE\n");			// TO REMOVE
 
 	return (edata);
 }

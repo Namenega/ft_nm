@@ -113,7 +113,6 @@ typedef struct	s_Elfdata {
 	const char	*shstrtab;
 	Elf64_Shdr	*symtab_hdr;
 	Elf64_Shdr	*strtab_hdr;
-
 }				t_Elfdata;
 
 
@@ -123,12 +122,12 @@ int			main(int ac, char **av);
 void		print_error(char *s, int exit_code, int fd);
 
 /* ---------- ELF PARSER FUNCTIONS ---------- */
-void		printFileData(void *elf_data, size_t st_size);
-void		printELFHeaderData(Elf64_Ehdr *ehdr);
-void		printELFSectionHeaderData(Elf64_Ehdr *ehdr, Elf64_Shdr *Shdr);
+//void		printFileData(void *elf_data, size_t st_size);
+//void		printELFHeaderData(Elf64_Ehdr *ehdr);
+//void		printELFSectionHeaderData(Elf64_Ehdr *ehdr, Elf64_Shdr *Shdr);
 int			isELFfile(void *elf_data, size_t st_size);
 Elf64_Shdr	*findSymtab(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab);
-t_Elfdata	elfParser(void *elf_data, int fd);
+t_Elfdata	elfParser(void *elf_data);
 
 
 /* ---------- SYMBOL PARSER FUNCTIONS ---------- */
