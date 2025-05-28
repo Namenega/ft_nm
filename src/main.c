@@ -41,6 +41,8 @@ int		main(int ac, char **av) {
 			perror("ft_nm: 'a.out'");
 			exit(EXIT_ARG);
 		}
+		ac = 2;
+		av[1] = "a.out";
 	}
 
 	for (int i = 1; i < ac; i++) {
@@ -77,7 +79,7 @@ int		main(int ac, char **av) {
 			continue;
 		}
 
-		ft_printf("\n%s:\n", av[i]);
+		//ft_printf("\n%s:\n", av[i]);
 
 		// Parse ELF header - locate section header, string table
 		edata = elfParser(data);
@@ -89,6 +91,8 @@ int		main(int ac, char **av) {
 			continue;
 		}
 
+		ft_printf("\n%s:\n", av[i]);
+		
 		// Find symbol table (.symtab) and associated string table
 		// Read and interpret symbol entries
 		// Print symbol tables entries
