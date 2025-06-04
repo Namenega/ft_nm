@@ -4,9 +4,8 @@
 void	print_error(char *s, int exit_code, int fd) {
 
 	perror(s);
-	if (exit_code != 1 && exit_code != 2) {
+	if (exit_code > 2)
 		close(fd);
-	}
 	exit(exit_code);
 }
 
@@ -79,8 +78,6 @@ int		main(int ac, char **av) {
 			continue;
 		}
 
-		//ft_printf("\n%s:\n", av[i]);
-
 		// Parse ELF header - locate section header, string table
 		edata = elfParser(data);
 
@@ -91,12 +88,14 @@ int		main(int ac, char **av) {
 			continue;
 		}
 
-		ft_printf("\n%s:\n", av[i]);
+		if (ac != 2)
+			ft_printf("\n%s:\n", av[i]);
 		
 		// Find symbol table (.symtab) and associated string table
 		// Read and interpret symbol entries
 		// Print symbol tables entries
 		symbolHandling(data, edata);
+	
 
 		// clean up
 		munmap(data, st.st_size);

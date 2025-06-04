@@ -20,6 +20,7 @@ SRCNAME	=	ft_atoi.c			\
 			ft_putstr_fd.c		\
 			ft_split.c			\
 			ft_strchr.c			\
+			ft_strcmp.c			\
 			ft_strdup.c			\
 			ft_strjoin.c		\
 			ft_strlcat.c		\
@@ -33,6 +34,7 @@ SRCNAME	=	ft_atoi.c			\
 			ft_substr.c			\
 			ft_tolower.c		\
 			ft_toupper.c		\
+			#ft_strcmp_skipchar.c
 
 BSRC	=	ft_lstadd_back.c	\
 			ft_lstadd_front.c	\
