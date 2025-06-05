@@ -9,7 +9,6 @@
 # include <fcntl.h>
 # include <sys/mman.h>
 # include <sys/stat.h>
-//# include <string.h>				// TO REMOVE
 
 # include "../inc/libft/libft.h"
 
@@ -61,6 +60,7 @@
 # define STB_LOPROC		13  // Start of processor-specific
 # define STB_HIPROC		15  // End of processor-specific
 
+
 // SYMBOL TYPE VALUE
 # define STT_NOTYPE		0   // Symbol type is unspecified
 # define STT_OBJECT		1   // Symbol is a data object (e.g., variable)
@@ -87,6 +87,7 @@
 #define SHN_COMMON		0xfff2 // Symbol in common block (uninitialized global)
 #define SHN_XINDEX		0xffff // Extended section index
 #define SHN_HIRESERVE	0xffff // End of reserved indices
+
 
 // SECTION HEADER FLAG VALUES
 # define SHF_WRITE		0x1        // Section contains writable data
@@ -183,9 +184,6 @@ int			main(int ac, char **av);
 void		print_error(char *s, int exit_code, int fd);
 
 /* ---------- ELF PARSER FUNCTIONS ---------- */
-//void		printFileData(void *elf_data, size_t st_size);
-//void		printELFHeaderData(Elf64_Ehdr *ehdr);
-//void		printELFSectionHeaderData(Elf64_Ehdr *ehdr, Elf64_Shdr *Shdr);
 int			isELFfile(void *elf_data, size_t st_size);
 Elf64_Shdr	*findSymtab(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab);
 t_Elfdata	elfParser(void *elf_data);
@@ -193,6 +191,5 @@ t_Elfdata	elfParser(void *elf_data);
 
 /* ---------- SYMBOL PARSER FUNCTIONS ---------- */
 void		symbolHandling(void *elf_data, t_Elfdata edata);
-
 
 #endif

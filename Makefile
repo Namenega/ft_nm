@@ -10,7 +10,7 @@ FT_NM		= ft_nm
 
 CC		= gcc
 RM		= rm -f
-CFLAGS		= -Wall -Wextra -Werror -I./inc/libft
+CFLAGS		= -g -Wall -Wextra -Werror -I./inc/libft
 
 CGREEN		= \033[38;2;0;153;0m
 CRED		= \033[0;31m
