@@ -74,12 +74,6 @@ static int	symbol_cmp(const t_Symbol *a, const t_Symbol *b) {
 		return (count_b - count_a);
 	}
 	return cmp;
-
-	
-	//printf("[%s] - [%s]\n", a->name, b->name);
-	//printf("STRCMP return : [%d]\n\n", ft_strcmp_skipchar(a->name, b->name, c));
-
-	return (ft_strcmp_skipchar(a->name, b->name, c));
 }
 
 
