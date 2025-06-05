@@ -184,7 +184,8 @@ void		symbolHandling(void *elf_data, t_Elfdata edata) {
 		Elf64_Sym sym = symbols[i].symbol;
 
 		len = ft_strlen(symbols[i].name);
-		if (len >= 2 && symbols[i].name[len - 2] == '.' && symbols[i].name[len - 1] == 'c')
+		if (len >= 2 && symbols[i].name[len - 2] == '.' &&
+				(symbols[i].name[len - 1] == 'c' || symbols[i].name[len - 1] == 'o'))
 			continue;
 
 		char type = '?';
