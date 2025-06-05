@@ -1,5 +1,6 @@
 #include "../hdr/nm.h"
 
+
 /*
  * Basic swap function
  */
@@ -41,6 +42,7 @@ static int ft_strcmp_skipchar(const char *s1, const char *s2, int c) {
 	return ((unsigned char)*s1 - (unsigned char)*s2);
 }
 
+
 /*
  * Comparing symbols with custom strcmp()
  *
@@ -50,7 +52,32 @@ static int ft_strcmp_skipchar(const char *s1, const char *s2, int c) {
 
 static int	symbol_cmp(const t_Symbol *a, const t_Symbol *b) {
 
-	int c = 95;
+	int c = 95, count_a, count_b;
+	int cmp = ft_strcmp_skipchar(a->name, b->name, c);
+
+	if (cmp == 0) {
+
+		// Count leading underscore
+		count_a = 0, count_b = 0;
+		const char *s1 = a->name;
+		const char *s2 = b->name;
+
+		while (*s1 == c) {
+			count_a++;
+			s1++;
+		}
+
+		while (*s2 == c) {
+			count_b++;
+			s2++;
+		}
+		return (count_b - count_a);
+	}
+	return cmp;
+
+	
+	//printf("[%s] - [%s]\n", a->name, b->name);
+	//printf("STRCMP return : [%d]\n\n", ft_strcmp_skipchar(a->name, b->name, c));
 
 	return (ft_strcmp_skipchar(a->name, b->name, c));
 }
@@ -140,6 +167,7 @@ static char	getELFSymbolType(Elf64_Sym symbol, char type, Elf64_Shdr *shdrs) {
 
 	return (type);
 }
+
 
 /*
  * Handle Symbols logic

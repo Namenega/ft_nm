@@ -61,3 +61,11 @@ echo ""
 ./ft_nm /bin/ls
 echo "\n"
 
+#-------------------------------------------------------------
+
+echo "\n\n${CY}>> THIRD TEST: EVERYTHING ${NC}\n"
+
+echo "${GR}Test 9: Everything --> ./ft_nm a b ft_nm Makefile /bin/ls /bin/grep ./resources/tester.txt src ./src/main.o${NC}"
+echo ""
+./ft_nm a b ft_nm Makefile /bin/ls /bin/grep ./resources/tester.txt src ./src/main.o
+echo "\n"

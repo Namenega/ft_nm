@@ -84,6 +84,8 @@ int		main(int ac, char **av) {
 		if (!edata.symtab_hdr || !edata.strtab_hdr) {
 			munmap(data, st.st_size);
 			close(fd);
+			if (ac != 2)
+				ft_printf("\n%s:\n", av[i]);
 			ft_printf("ft_nm: %s: no symbols\n", av[i]);
 			continue;
 		}
