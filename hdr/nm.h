@@ -9,6 +9,7 @@
 # include <fcntl.h>
 # include <sys/mman.h>
 # include <sys/stat.h>
+# include <elf.h>
 
 # include "../inc/libft/libft.h"
 
@@ -23,6 +24,7 @@
 
 
 // TABLE VALUE MACRO
+/*
 # define SHT_NULL			0  // Section header table entry unused
 # define SHT_PROGBITS		1  // Program data
 # define SHT_SYMTAB			2  // Symbol table
@@ -105,10 +107,11 @@
 
 # define SHF_MASKOS		0x0ff00000 // OS-specific
 # define SHF_MASKPROC	0xf0000000 // Processor-specific
-
+*/
 
 
 /* Executable header structure */
+/*
 typedef struct	Elf64_Ehdr {
 
 	unsigned char	e_ident[16];
@@ -127,9 +130,11 @@ typedef struct	Elf64_Ehdr {
 	uint16_t		e_shstrndx;		// Index of shstrtab (Elf64_Shdr struct)
 
 }				Elf64_Ehdr;
+*/
 
 
 /* Section Header structure */
+/*
 typedef struct	Elf64_Shdr {
 
 	uint32_t	sh_name;
@@ -144,9 +149,11 @@ typedef struct	Elf64_Shdr {
 	uint64_t	sh_entsize;		//0 if unused
 
 }				Elf64_Shdr;
+*/
 
 
 /* Symtab structure*/
+/*
 typedef struct	Elf64_Sym {
 
 	uint32_t		st_name;	// Symbol name (index into string table)
@@ -156,26 +163,48 @@ typedef struct	Elf64_Sym {
     uint64_t		st_value;	// Symbol value
     uint64_t		st_size;	// Symbol size
 }				Elf64_Sym;
+*/
 
 
 /* Global ELF headers and section headers structure */
-typedef struct	s_Elfdata {
+
+typedef struct	s_Elf64data {
 
 	Elf64_Ehdr	*ehdr;
 	Elf64_Shdr	*shdr;
 	const char	*shstrtab;
 	Elf64_Shdr	*symtab_hdr;
 	Elf64_Shdr	*strtab_hdr;
-}				t_Elfdata;
+	int			valid;
+}				t_Elf64data;
+
+
+typedef struct	s_Elf32data {
+
+	Elf32_Ehdr	*ehdr;
+	Elf32_Shdr	*shdr;
+	const char	*shstrtab;
+	Elf32_Shdr	*symtab_hdr;
+	Elf32_Shdr	*strtab_hdr;
+	int			valid;
+}				t_Elf32data;
+
 
 
 /* Symbol storing structure to ordered output*/
-typedef struct	s_Symbol {
+
+typedef struct	s_64Symbol {
 
 	Elf64_Sym	symbol;
 	const char	*name;
-}				t_Symbol;
+}				t_64Symbol;
 
+
+typedef struct	s_32Symbol {
+
+	Elf32_Sym	symbol;
+	const char	*name;
+}				t_32Symbol;
 
 
 /* ---------- MAIN FUNCTIONS ---------------- */
@@ -183,13 +212,23 @@ typedef struct	s_Symbol {
 int			main(int ac, char **av);
 void		print_error(char *s, int exit_code, int fd);
 
-/* ---------- ELF PARSER FUNCTIONS ---------- */
+/* ---------- ELF 64 PARSER FUNCTIONS ---------- */
 int			isELFfile(void *elf_data, size_t st_size);
-Elf64_Shdr	*findSymtab(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab);
-t_Elfdata	elfParser(void *elf_data);
+Elf64_Shdr	*findSymtab64Header(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab, Elf64_Shdr shstrtab_hdr);
+Elf64_Shdr	*findStrtab64Header(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr, const char *shstrtab, Elf64_Shdr shstrtab_hdr);
+t_Elf64data	elf64Parser(void *elf_data, off_t file_size);
+
+/* ---------- ELF 32 PARSER FUNCTIONS ---------- */
+Elf32_Shdr	*findSymtab32Header(Elf32_Ehdr *ehdr, Elf32_Shdr *shdr, const char *shstrtab, Elf32_Shdr shstrtab_hdr);
+Elf32_Shdr	*findStrtab32Header(Elf32_Ehdr *ehdr, Elf32_Shdr *shdr, const char *shstrtab, Elf32_Shdr shstrtab_hdr);
+t_Elf32data	elf32Parser(void *elf_data, off_t file_size);
 
 
-/* ---------- SYMBOL PARSER FUNCTIONS ---------- */
-void		symbolHandling(void *elf_data, t_Elfdata edata);
+/* ---------- SYMBOL64 PARSER FUNCTIONS ---------- */
+void		symbol64Handling(void *elf_data, t_Elf64data edata);
+
+/* ---------- SYMBOL32 PARSER FUNCTIONS ---------- */
+void		symbol32Handling(void *elf_data, t_Elf32data edata);
+
 
 #endif

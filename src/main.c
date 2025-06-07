@@ -29,10 +29,11 @@ static int no_arg(const char *filename) {
 
 int		main(int ac, char **av) {
 
-	int				fd;
+	int				fd, arch;
 	struct stat		st;
 	void			*data;
-	t_Elfdata		edata;
+	t_Elf32data		e32data;
+	t_Elf64data		e64data;
 
 	// Validate arguments (except at least one for ELF file)
 	if (ac == 1) {
@@ -70,34 +71,73 @@ int		main(int ac, char **av) {
 		if (data == MAP_FAILED)
 			print_error("mmap()", EXIT_MMAP, fd);
 
-		// Validate ELF magic byte
-		if (isELFfile(data, st.st_size) != 1) {
+		// Validate ELF magic byte and architecture
+		arch = isELFfile(data, st.st_size);
+
+		if (arch == 0) {
 			munmap(data, st.st_size);
 			close(fd);
 			ft_printf("ft_nm: %s: file format not recognized\n", av[i]);
 			continue;
 		}
 
-		// Parse ELF header - locate section header, string table
-		edata = elfParser(data);
 
-		if (!edata.symtab_hdr || !edata.strtab_hdr) {
-			munmap(data, st.st_size);
-			close(fd);
+		// Parsing will depend on ELF architecture
+		if (arch == 2) {
+
+			// Parse ELF header - locate section header, string table
+			e64data = elf64Parser(data, st.st_size);
+			
+
+			if (!e64data.valid || !e64data.symtab_hdr || !e64data.strtab_hdr) {
+				munmap(data, st.st_size);
+				close(fd);
+				if (ac != 2)
+					ft_printf("\n%s:\n", av[i]);
+				if (!e64data.valid) {
+					ft_printf("bfd plugin: %s: file too short\n", av[i]);
+					ft_printf("ft_nm: %s: file format not recognized\n");
+				} else
+					ft_printf("ft_nm: %s: no symbols\n", av[i]);
+				continue;
+			}
+
 			if (ac != 2)
 				ft_printf("\n%s:\n", av[i]);
-			ft_printf("ft_nm: %s: no symbols\n", av[i]);
-			continue;
-		}
 
-		if (ac != 2)
-			ft_printf("\n%s:\n", av[i]);
-		
-		// Find symbol table (.symtab) and associated string table
-		// Read and interpret symbol entries
-		// Print symbol tables entries
-		symbolHandling(data, edata);
-	
+			// Find symbol table (.symtab) and associated string table
+			// Read and interpret symbol entries
+			// Print symbol tables entries
+			symbol64Handling(data, e64data);
+
+		} else if (arch == 1) {
+
+			// Parse ELF header - locate section header, string table
+			e32data = elf32Parser(data, st.st_size);
+			
+			if (!e32data.valid || !e32data.symtab_hdr || !e32data.strtab_hdr) {
+				munmap(data, st.st_size);
+				close(fd);
+				if (ac != 2)
+					ft_printf("\n%s:\n", av[i]);
+				if (!e32data.valid) {
+					ft_printf("bfd plugin: %s: file too short\n", av[i]);
+					ft_printf("ft_nm: %s: file format not recognized\n");
+				} else
+					ft_printf("ft_nm: %s: no symbols\n", av[i]);
+				continue;
+			}
+			
+
+			if (ac != 2)
+				ft_printf("\n%s:\n", av[i]);
+
+			// Find symbol table (.symtab) and associated string table
+			// Read and interpret symbol entries
+			// Print symbol tables entries
+			symbol32Handling(data, e32data);
+
+		}
 
 		// clean up
 		munmap(data, st.st_size);

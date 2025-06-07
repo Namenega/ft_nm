@@ -5,9 +5,9 @@
  * Basic swap function
  */
 
-static void	swap_sym(t_Symbol *a, t_Symbol *b) {
+static void	swap_sym(t_32Symbol *a, t_32Symbol *b) {
 
-	t_Symbol tmp = *a;
+	t_32Symbol tmp = *a;
 	*a = *b;
 	*b = tmp;
 }
@@ -50,7 +50,7 @@ static int ft_strcmp_skipchar(const char *s1, const char *s2, int c) {
  * underscore is not involved in the sorting.
  */
 
-static int	symbol_cmp(const t_Symbol *a, const t_Symbol *b) {
+static int	symbol_cmp(const t_32Symbol *a, const t_32Symbol *b) {
 
 	int c = 95, count_a, count_b;
 	int cmp = ft_strcmp_skipchar(a->name, b->name, c);
@@ -81,10 +81,10 @@ static int	symbol_cmp(const t_Symbol *a, const t_Symbol *b) {
  * Sorting alphabetically the symbols before output
  */
 
-static void	sortSymbols(t_Symbol *array, int left, int right) {
+static void	sort32Symbols(t_32Symbol *array, int left, int right) {
 
 	int			pivot_idx, i, j;
-	t_Symbol	pivot;
+	t_32Symbol	pivot;
 
 	if (left >= right)
 		return;
@@ -109,8 +109,8 @@ static void	sortSymbols(t_Symbol *array, int left, int right) {
 
 	swap_sym(&array[left], &array[j]);
 
-	sortSymbols(array, left, j - 1);
-	sortSymbols(array, j + 1, right);
+	sort32Symbols(array, left, j - 1);
+	sort32Symbols(array, j + 1, right);
 }
 
 /*
@@ -121,9 +121,9 @@ static void	sortSymbols(t_Symbol *array, int left, int right) {
  * shdrs = section headers
  */
 
-static char	getELFSymbolType(Elf64_Sym symbol, char type, Elf64_Shdr *shdrs) {
+static char	getELF32SymbolType(Elf32_Sym symbol, char type, Elf32_Shdr *shdrs) {
 
-	uint8_t	bind = ELF64_ST_BIND(symbol.st_info);
+	uint8_t	bind = ELF32_ST_BIND(symbol.st_info);
 
 	if (bind == STB_GNU_UNIQUE)
 		return ('u');
@@ -137,7 +137,7 @@ static char	getELFSymbolType(Elf64_Sym symbol, char type, Elf64_Shdr *shdrs) {
 	if (symbol.st_shndx == SHN_COMMON)
 		return ('C');
 	
-	Elf64_Shdr sec = shdrs[symbol.st_shndx];
+	Elf32_Shdr sec = shdrs[symbol.st_shndx];
 
 	if ((sec.sh_type == SHT_NOBITS) && (sec.sh_flags & SHF_ALLOC) && (sec.sh_flags & SHF_WRITE))
 		type = 'B'; // .bss
@@ -172,16 +172,16 @@ static char	getELFSymbolType(Elf64_Sym symbol, char type, Elf64_Shdr *shdrs) {
  * elf_data = mapped data
  */
 
-void		symbolHandling(void *elf_data, t_Elfdata edata) {
+void		symbol32Handling(void *elf_data, t_Elf32data edata) {
 
-	Elf64_Sym	*symtab = (Elf64_Sym *)((char *)elf_data + edata.symtab_hdr->sh_offset);
+	Elf32_Sym	*symtab = (Elf32_Sym *)((char *)elf_data + edata.symtab_hdr->sh_offset);
 	const char	*strtab = (char *)elf_data + edata.strtab_hdr->sh_offset;
 	int			sym_count = edata.symtab_hdr->sh_size / edata.symtab_hdr->sh_entsize;
 	int			valid_count = 0;
-	t_Symbol	*symbols;
+	t_32Symbol	*symbols;
 	size_t		len = 0;
 
-	if (!(symbols = malloc(sizeof(t_Symbol) * sym_count)))
+	if (!(symbols = malloc(sizeof(t_32Symbol) * sym_count)))
 		return ;
 	
 	// Fill symbol array
@@ -198,12 +198,12 @@ void		symbolHandling(void *elf_data, t_Elfdata edata) {
 	}
 
 	// sort symbols
-	sortSymbols(symbols, 0, valid_count - 1);
+	sort32Symbols(symbols, 0, valid_count - 1);
 
 	// Iterate over symbols
 	for (int i = 0; i < valid_count; i++) {
 
-		Elf64_Sym sym = symbols[i].symbol;
+		Elf32_Sym sym = symbols[i].symbol;
 
 		len = ft_strlen(symbols[i].name);
 		if (len >= 2 && symbols[i].name[len - 2] == '.' &&
@@ -211,14 +211,14 @@ void		symbolHandling(void *elf_data, t_Elfdata edata) {
 			continue;
 
 		char type = '?';
-		type = getELFSymbolType(sym, type, edata.shdr);
+		type = getELF32SymbolType(sym, type, edata.shdr);
 
 		// Print symbol
         if (sym.st_shndx != SHN_UNDEF) {
-			ft_printf("%016lx %c %s\n", sym.st_value, type, symbols[i].name);
+			ft_printf("%08lx %c %s\n", sym.st_value, type, symbols[i].name);
 		}
         else
-            ft_printf("                 %c %s\n", type, symbols[i].name);
+            ft_printf("         %c %s\n", type, symbols[i].name);
 	}
 
 	free(symbols);
