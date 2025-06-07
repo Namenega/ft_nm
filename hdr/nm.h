@@ -23,7 +23,7 @@
 # define EXIT_MALLOC	7
 
 
-// TABLE VALUE MACRO
+// TABLE VALUE MACRO [INFORMATIONAL]
 /*
 # define SHT_NULL			0  // Section header table entry unused
 # define SHT_PROGBITS		1  // Program data
@@ -45,14 +45,14 @@
 
 
 
-// BINDING INFO SYMBOL MACRO (upper 4 bits)
+// BINDING INFO SYMBOL MACRO (upper 4 bits) [INFORMATIONAL]
 # define ELF64_ST_BIND(i) ((i) >> 4)
 
-// TYPE INFO SYMBOL MACRO (lower 4 bits)
+// TYPE INFO SYMBOL MACRO (lower 4 bits) [INFORMATIONAL]
 # define ELF64_ST_TYPE(i) ((i) & 0xF)
 
 
-// SYMBOL BINDING VALUE
+// SYMBOL BINDING VALUE [INFORMATIONAL]
 # define STB_LOCAL		0   // Local symbol
 # define STB_GLOBAL		1   // Global symbol
 # define STB_WEAK		2   // Weak symbol
@@ -63,7 +63,7 @@
 # define STB_HIPROC		15  // End of processor-specific
 
 
-// SYMBOL TYPE VALUE
+// SYMBOL TYPE VALUE [INFORMATIONAL]
 # define STT_NOTYPE		0   // Symbol type is unspecified
 # define STT_OBJECT		1   // Symbol is a data object (e.g., variable)
 # define STT_FUNC		2   // Symbol is a code object (function)
@@ -78,7 +78,7 @@
 # define STT_HIPROC		15  // End of processor-specific types
 
 
-// SYMBOL SECTION INDEX VALUE
+// SYMBOL SECTION INDEX VALUE [INFORMATIONAL]
 #define SHN_UNDEF		0      // Undefined section
 #define SHN_LORESERVE	0xff00 // Start of reserved indices
 #define SHN_LOPROC		0xff00 // Start of processor-specific
@@ -91,7 +91,7 @@
 #define SHN_HIRESERVE	0xffff // End of reserved indices
 
 
-// SECTION HEADER FLAG VALUES
+// SECTION HEADER FLAG VALUES [INFORMATIONAL]
 # define SHF_WRITE		0x1        // Section contains writable data
 # define SHF_ALLOC		0x2        // Section is allocated in memory image of the program
 # define SHF_EXECINSTR	0x4        // Section contains executable instructions
@@ -110,7 +110,7 @@
 */
 
 
-/* Executable header structure */
+/* Executable header structure  [INFORMATIONAL] */
 /*
 typedef struct	Elf64_Ehdr {
 
@@ -133,7 +133,7 @@ typedef struct	Elf64_Ehdr {
 */
 
 
-/* Section Header structure */
+/* Section Header structure  [INFORMATIONAL] */
 /*
 typedef struct	Elf64_Shdr {
 
@@ -152,7 +152,7 @@ typedef struct	Elf64_Shdr {
 */
 
 
-/* Symtab structure*/
+/* Symtab structure  [INFORMATIONAL] */
 /*
 typedef struct	Elf64_Sym {
 
@@ -231,4 +231,4 @@ void		symbol64Handling(void *elf_data, t_Elf64data edata);
 void		symbol32Handling(void *elf_data, t_Elf32data edata);
 
 
-#endif
+#endif /* NM_H */
